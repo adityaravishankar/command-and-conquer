@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+		<title>Command and Conquer - Tiberian Dawn - HTML5</title>
+		<link rel="shortcut icon" href="http://www.adityaravishankar.com/favicon.ico" />
+		<meta property='fb:app_id' content='268072089881146' />
+		<meta property='og:title' content='Command and Conquer - Tiberian Dawn - HTML5' />
+		<meta property='og:url' content='http://www.adityaravishankar.com/projects/games/command-and-conquer/' />
+		<meta property='og:image' content='http://www.adityaravishankar.com/projects/games/command-and-conquer/images/logo.jpg' />
+		<!--<meta http-equiv="Pragma" content="no-cache">
+	    <meta http-equiv="Expires" content="-1">
+	    <meta http-equiv="cache-control" content="no-store">
+		-->
+		<script src="js/jquery.min.js"	 type="text/javascript" charset="utf-8"></script>
+		<script src="js/cnc.js"	 type="text/javascript" charset="utf-8">
+		</script>
+	</head>
+	<body>
+		<style type="text/css">
+			body {
+				background:black;
+				color:white;
+				text-align:center;	
+				font-family: Arial, Helvetica, sans-serif;
+				font-size:14px;			
+			}
+			
+			canvas {
+				border:1px solid white;	
+				cursor:url(images/cursors/blank.gif),none !important;
+				background-image: url(images/loading.gif),url(images/htitle.jpeg);
+				background-position: center bottom,center;
+				background-repeat: no-repeat,no-repeat;
+			}
+			#debugger {
+				border:1px solid white;	
+				font-size:12px;
+				padding:5px;
+				overflow:auto;
+				height:400px;		
+			}
+			
+			#specialcontrols{
+			}
+			
+			@font-face {
+				font-family:'Command and Conquer';
+				src:url('images/sidebar/cnc.ttf');
+			}
+			
+			div {
+				border:0px solid red;
+			}
+			
+			#leftcontent {
+				float:left;
+				width:450px;
+				padding:10px;
+				text-align:left;	
+			}
+			
+			#rightcontent {
+				float:left;
+				width:640px;
+				padding:10px;
+				text-align:left;	
+			}
+			
+			#rightmostcontent {
+				text-align: left;
+				float:right;
+				margin:10px;
+				margin-top:0px;
+				vertical-align:middle;
+				display:none;
+			}
+			
+			H1{
+				color:yellow;
+				text-align:left;		
+			}		
+			
+			#header {
+				padding-bottom:20px;
+			}
+
+		</style>
+
+			<div id="leftcontent">
+				<img style="float:left;"src="images/logo.jpg" width="400" height="146" alt="Command and Conquer">
+				<h1 >C&amp;C - HTML5 v0.3 by <span style="font-size:small;color:white;"><a href="http://www.adityaravishankar.com">Aditya Ravi Shankar</a></span>
+				</h1>
+				<div id="debugger">
+					Debugging off. 
+				</div>
+			</div>
+			<div id="rightcontent">
+			<canvas id="canvas" width="640" height="535">
+				Your browser does not support the HTML5 Canvas feature. This game uses new HTML5 features and will only work on the latest versions of Firefox, Safari or Chrome (and maybe Internet Explorer 9).			
+			</canvas>
+		
+			<div id='specialcontrols'>
+				<label for="debug_mode">Debug Mode: </label><input type="checkbox" name="debug_mode" id="debug_mode">
+			</div>
+			<div id = "featuresdiv">
+				
+					
+				<br>
+				<p style="font-size:smaller;">Updates:
+					<ul style="font-size:smaller;">
+						<li>v0.3b patch Released - Bugfixes
+							<ul>
+							<li>Tanks can turn in place</li>	
+							<li>Tooltip shows unit/building cost</li>
+							<li>Harvester life does not regenerate inside refinery</li>
+							<li>Can pan to the right edge of the map even with sidebar visible</li>
+							</ul>
+						</li>	
+						<br>
+						<li>v0.3 Released
+							<ul>
+							<li>Can repair or sell buildings</li>	
+							<li>Refinery and Harvesters to process tiberium (cash)</li>
+							<li>Lots of bug fixes</li>
+							</ul>
+						</li>	
+						<br>
+						<li>v0.2 Released
+							<ul>
+							<li>Improved pathfinding</li>
+							</ul>
+						</li>
+						<br>
+						<li>v0.1 Released</li>
+					</ul>
+				</p>
+				<p style="font-size:smaller;margin-top:10px;">Controls:
+					<ul style="font-size:smaller;">
+						<li>Unit Selection 
+							<ul>
+							<li>Single Unit - Click on a unit to select it</li>	
+							<li>Drag Selection - Drag mouse to select multiple units</li>
+							<li>Multiple Selection - Shift + Click to add unit  multiple units</li>
+							</ul>
+						</li>	
+						<li>Movement/Attacking
+							<ul>
+							<li>Move - Select unit(s) and click on destination to move</li>
+							<li>Attack - Select unit(s) and click on target building or unit to attack</li>
+							<li>Map panning - Move cursor near edge of map to pan and scroll around</li>
+							</ul>
+						</li>
+						<li>Building
+							<ul>
+							<li>Build Construction Yard - Move MCV to where you want, and click on it to deploy</li>
+							<li>Expand Sidebar and click on construction options to build them. Once you finish contruction, more options become available</li>
+							</ul>
+						</li>
+						
+					</ul>
+				</p>
+				
+							<p style="font-size:smaller;">DISCLAIMER: This project is only intended as a technical proof of concept to demonstrate the basic working elements of an RTS game in HTML5. No commercial use is intended. All images and sounds used are from C&amp;C - Tiberian Dawn and are property of the original game creators. </p>
+
+			</div>
+	
+		</div>
+		
+			<div style="float:left;margin-left:20px;padding:20px;">
+				<div style="">
+				<!--script type="text/javascript">
+				google_ad_client = "ca-pub-4565102206556382";
+				/* SmallSquare1 */
+				google_ad_slot = "9663428057";
+				google_ad_width = 200;
+				google_ad_height = 200;
+
+				</script-->
+				
+				<!--scr ipt type="text/javascript"
+				src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+				</script-->	
+				</div>
+				<div style="padding:20px;">
+				<!--scr ipt type="text/javascript">
+				google_ad_client = "ca-pub-4565102206556382";
+				/* Small Square 2 */
+				google_ad_slot = "3705220259";
+				google_ad_width = 200;
+				google_ad_height = 200;
+				
+				</script-->
+				<!--scr ipt type="text/javascript"
+				src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+				</script-->
+				</div>
+				<div>
+					<!--script type="text/javascript">
+					google_ad_client = "ca-pub-4565102206556382";
+					/* Skyscraper */
+					google_ad_slot = "9356447655";
+					google_ad_width = 160;
+					google_ad_height = 600;
+				
+					</script-->
+					<!--scr ipt type="text/javascript"
+					src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+					</script-->
+				</div>
+			</div>
+	
+		
+	</body>
+</html>
