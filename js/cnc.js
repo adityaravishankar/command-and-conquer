@@ -80,10 +80,10 @@ $(function() {
 	            return;
 	        }
 	        this.cursorLoop ++;
-	        if(this.cursorLoop >= this.cursor.cursorSpeed * this.cursor.images.length){
+	        if(this.cursorLoop >= this.cursor.cursorSpeed * this.cursor.count){
                 this.cursorLoop = 0;
             }
-            
+            //alert(mouse.spriteImage)
             // If drag selecting, draw a white selection rectangle
     	    if(this.dragSelect){    
     	        var x = Math.min(this.gameX,this.dragX);
@@ -94,8 +94,9 @@ $(function() {
 			    context.strokeRect(x+game.viewportAdjustX,y+game.viewportAdjustY, width, height);
     	    }
     	    
-            var image = this.cursor.images[Math.floor(this.cursorLoop/this.cursor.cursorSpeed)];
-            context.drawImage(image,this.x-this.cursor.x,this.y-this.cursor.y);
+            //var image = this.cursor.images[Math.floor(this.cursorLoop/this.cursor.cursorSpeed)];
+            var imageNumber = this.cursor.spriteOffset+Math.floor(this.cursorLoop/this.cursor.cursorSpeed);
+            context.drawImage(this.spriteImage,30*(imageNumber),0,30,24,this.x-this.cursor.x,this.y-this.cursor.y,30,24);
 	    },
 	    checkOverObject:function(){
 	        this.overObject = null;
@@ -353,8 +354,9 @@ $(function() {
 	    preloadCount:0,
 	    loadedCount:0,
 	    preloadImage:preloadImage,
-	    loadImageArray:loadImageArray,
-	    cursors:{},
+	    spriteImage:null,
+	    cursors:[],
+    	cursorCount:0,
 	    loadCursor:function(name,x,y,imageCount,cursorSpeed){
 	        if(!x && !y){
 	            x = 0;
@@ -363,54 +365,51 @@ $(function() {
 	        if(!cursorSpeed){
 	            cursorSpeed = 1;
 	        }
-	        var imageArray;
-	        if (imageCount){
-	            imageArray = this.loadImageArray('cursors/'+name,imageCount,'.gif');
-	        } else {
-	            imageArray = [this.preloadImage('cursors/'+name+'.gif')];
+	        if(!imageCount){
+	            imageCount = 1;
 	        }
-	        this.cursors[name] = {x:x,y:y,name:name,images:imageArray,cursorSpeed:cursorSpeed};
+	        this.cursors[name] = {x:x,y:y,name:name,count:imageCount,spriteOffset:this.cursorCount,cursorSpeed:cursorSpeed};
+	        this.cursorCount += imageCount;
 	        
 	    },
 	    loadAllCursors:function(){
-            // simple list no hotspots
+	        mouse.spriteImage = this.preloadImage('cursors.png');
+	        mouse.loadCursor('attack',15,12,8);
+	        mouse.loadCursor('big_detonate',15,12,3);
+            mouse.loadCursor('build_command',15,12,9);
             mouse.loadCursor('default');
-            mouse.loadCursor('no_default');
-            mouse.loadCursor('move',15,12);
-            mouse.loadCursor('no_move',15,12);
-
-
-            //Hot spots based on size of 30 24;  30,24
-            mouse.loadCursor('pan_top', 15,0);
-            mouse.loadCursor('pan_top_right', 30,0);
-            mouse.loadCursor('pan_right', 30,12);
-            mouse.loadCursor('pan_bottom_right',30,24); 
-            mouse.loadCursor('pan_bottom', 15,24); 
-            mouse.loadCursor('pan_bottom_left',0,24); 
-            mouse.loadCursor('pan_left',0,12); 
-            mouse.loadCursor('pan_top_left',0,0);
-
-            mouse.loadCursor('no_pan_top', 15,0);
-            mouse.loadCursor('no_pan_top_right', 30,0);
-            mouse.loadCursor('no_pan_right', 30,12);
-            mouse.loadCursor('no_pan_bottom_right',30,24); 
-            mouse.loadCursor('no_pan_bottom', 15,24); 
-            mouse.loadCursor('no_pan_bottom_left',0,24); 
-            mouse.loadCursor('no_pan_left',0,12); 
-            mouse.loadCursor('no_pan_top_left',0,0);
-
-            mouse.loadCursor('no_repair',15,0);
-            mouse.loadCursor('no_sell',15,12);
-
-            // hot spot with multiple images
-            mouse.loadCursor('build_command',15,12,8);
-            mouse.loadCursor('sell',15,12,24);
-            mouse.loadCursor('repair',15,0,24);
-            mouse.loadCursor('attack',15,12,8);
-            mouse.loadCursor('big_detonate',15,12,3);
             mouse.loadCursor('detonate',15,12,3);
             mouse.loadCursor('load_vehicle',15,12,3,2);
-            mouse.loadCursor('select',15,12,6,2);   
+            
+            mouse.loadCursor('unknown');
+            mouse.loadCursor('unknown');
+            mouse.loadCursor('move',15,12);
+            mouse.loadCursor('no_default');
+            mouse.loadCursor('no_move',15,12);
+            
+            mouse.loadCursor('no_pan_bottom', 15,24); 
+            mouse.loadCursor('no_pan_bottom_left',0,24);
+            mouse.loadCursor('no_pan_bottom_right',30,24); 
+            mouse.loadCursor('no_pan_left',0,12); 
+            mouse.loadCursor('no_pan_right', 30,12);
+            mouse.loadCursor('no_pan_top', 15,0);
+            mouse.loadCursor('no_pan_top_left',0,0);
+            mouse.loadCursor('no_pan_top_right', 30,0);
+            
+            mouse.loadCursor('no_repair',15,0);
+            mouse.loadCursor('no_sell',15,12);
+            
+            mouse.loadCursor('pan_bottom', 15,24); 
+            mouse.loadCursor('pan_bottom_left',0,24);
+            mouse.loadCursor('pan_bottom_right',30,24); 
+            mouse.loadCursor('pan_left',0,12); 
+            mouse.loadCursor('pan_right', 30,12);
+            mouse.loadCursor('pan_top', 15,0);
+            mouse.loadCursor('pan_top_left',0,0);
+            mouse.loadCursor('pan_top_right', 30,0);
+            mouse.loadCursor('repair',15,0,24);
+            mouse.loadCursor('select',15,12,6,2); 
+            mouse.loadCursor('sell',15,12,24);
 	    }
 	}; 
 	
@@ -1141,7 +1140,7 @@ $(function() {
                 };
     	        
     	        
-    	    },game.animationTimeout*40*60);
+    	    },game.animationTimeout*40*600);
     	    
     	    this.statusLoop = setInterval(game.missionStatus,3000);
  	    
@@ -1169,7 +1168,7 @@ $(function() {
 	    cash:0,
 	    finishDeployingBuilding:function(){
 	        for (var i=0; i < game.buildings.length; i++) {
-	            if(game.buildings[i].name=='construction-yard'){
+	            if(game.buildings[i].name=='construction-yard' && game.buildings[i].team  == game.currentLevel.team){
 	                game.buildings[i].status='construct';
 	                break;
 	            }
@@ -1717,6 +1716,7 @@ $(function() {
 	        'construction-yard':{
 	            name:'construction-yard',
 	            label:'Construction Yard',
+	            type:'building',
 	            powerIn:15,
         	    powerOut:30,
         	    cost:5000,
@@ -1724,11 +1724,11 @@ $(function() {
         	    hitPoints:400,
         	    imagesToLoad:[
         	        {name:'build',count:32},
-        	        {name:"healthy",count:4},
         	        {name:"damaged",count:4},
-        	        {name:"ultra-damaged",count:1},
+        	        {name:'damaged-construct',count:20},
+        	        {name:"healthy",count:4},
         	        {name:'healthy-construct',count:20},
-        	        {name:'damaged-construct',count:20}],
+        	        {name:"ultra-damaged",count:1}],       
         	    gridShape: [
         	        [1,1,1],
         	        [1,1,1]]
@@ -1736,6 +1736,7 @@ $(function() {
 	        'refinery':{
 	            name:'refinery',
 	            label:'Tiberium Refinery',
+	            type:'building',
 	            powerIn:40,
         	    powerOut:10,
         	    cost:2000,
@@ -1744,11 +1745,11 @@ $(function() {
         	    hitPoints:450,
         	    imagesToLoad:[
         	        {name:'build',count:20},
-        	        {name:"healthy",count:12},
         	        {name:"damaged",count:12},
-        	        {name:"ultra-damaged",count:1},
+        	        {name:'damaged-unload',count:18},
+        	        {name:"healthy",count:12},
         	        {name:'healthy-unload',count:18},
-        	        {name:'damaged-unload',count:18}],
+        	        {name:"ultra-damaged",count:1}],      	        
         	    gridShape: [
         	        [1,1,1],
         	        [1,1,1],
@@ -1756,14 +1757,17 @@ $(function() {
 	        },
 	        'barracks':{
     	        name:'barracks',
-    	        label:'Power Plant',
+    	        label:'Barracks',
+    	        type:'building',
     	        powerIn:20,
     	        cost:300,
     	        sight:3,
     	        hitPoints:400,
     	        imagesToLoad:[
-        	        {name:'build',count:20},{name:"healthy",count:10},
-        	        {name:"damaged",count:10},{name:"ultra-damaged",count:1}],
+        	        {name:'build',count:20},
+        	        {name:"damaged",count:10},
+        	        {name:"healthy",count:10},
+        	        {name:"ultra-damaged",count:1}],
     	        gridShape: [[1,1],
     	                    [1,1]]
          
@@ -1771,51 +1775,63 @@ $(function() {
     	    'power-plant':{
                 name:'power-plant',
     	        label:'Power Plant',
+    	        type:'building',
     	        powerOut:100,
     	        cost:300,
     	        sight:2,
     	        hitPoints:200,
     	        imagesToLoad:[
-        	        {name:'build',count:20},{name:"healthy",count:4},
-        	        {name:"damaged",count:4},{name:"ultra-damaged",count:1}],
+        	        {name:'build',count:20},
+        	        {name:"damaged",count:4},
+        	        {name:"healthy",count:4},
+        	        {name:"ultra-damaged",count:1}],
     	        gridShape: [[1,0],
     	                    [1,1]]          
     	    },	    
     	    'advanced-power-plant':{
                 name:'advanced-power-plant',
     	        label:'Advanced Power Plant',
+    	        type:'building',
     	        powerOut:200,
     	        cost:700,
     	        sight:2,
     	        hitPoints:300,
     	        imagesToLoad:[
-        	        {name:'build',count:20},{name:"healthy",count:4},
-        	        {name:"damaged",count:4},{name:"ultra-damaged",count:1}],
+        	        {name:'build',count:20},
+        	        {name:"damaged",count:4},
+        	        {name:"healthy",count:4},
+        	        {name:"ultra-damaged",count:1}],
     	        gridShape: [[1,0],
     	                    [1,1]]          
     	    },
     	    'tiberium-silo':{
                 name:'tiberium-silo',
     	        label:'Tiberium Silo',
+    	        type:'building',
     	        powerIn:10,
     	        cost:150,
     	        sight:2,
     	        hitPoints:150,
     	        imagesToLoad:[
-        	        {name:'build',count:20},{name:"healthy",count:5},
-        	        {name:"damaged",count:5},{name:"ultra-damaged",count:1}],
+        	        {name:'build',count:20},
+        	        {name:"damaged",count:5},
+        	        {name:"healthy",count:5},
+        	        {name:"ultra-damaged",count:1}],
     	        gridShape: [[1,1]]          
     	    },
     	    'hand-of-nod':{
                 name:'hand-of-nod',
     	        label:'Hand of Nod',
+    	        type:'building',
     	        powerIn:20,
     	        cost:300,
     	        sight:3,
     	        hitPoints:400,
     	        imagesToLoad:[
-        	        {name:'build',count:20},{name:"healthy",count:1},
-        	        {name:"damaged",count:1},{name:"ultra-damaged",count:1}],
+        	        {name:'build',count:20},
+        	        {name:"damaged",count:1},
+        	        {name:"healthy",count:1},      
+        	        {name:"ultra-damaged",count:1}],
     	        gridShape: [[0,0],
     	                    [1,1],
     	                    [1,1]]          
@@ -1823,18 +1839,22 @@ $(function() {
     	    'weapons-factory':{
                 name:'weapons-factory',
     	        label:'Weapons Factory',
+    	        type:'building',
     	        powerIn:30,
     	        cost:2000,
     	        sight:3,
     	        hitPoints:200,
     	        imagesToLoad:[
-        	        {name:'build',count:20},{name:"healthy",count:1},
-        	        {name:"damaged",count:1},{name:"ultra-damaged",count:0},
-        	        {name:'healthy-construct',count:9},
-        	        {name:'damaged-construct',count:9},
-        	        {name:'healthy-base',count:1},
+        	        {name:'build',count:20},
+        	        {name:"damaged",count:1},
         	        {name:'damaged-base',count:1},
-        	        {name:'ultra-damaged-base',count:1}
+        	        {name:'damaged-construct',count:9},
+        	        
+        	        {name:"healthy",count:1},
+        	        {name:'healthy-base',count:1},
+        	        {name:'healthy-construct',count:9},
+        	        {name:"ultra-damaged",count:0},
+                    {name:'ultra-damaged-base',count:1}
         	        ],
     	        gridShape: [[1,1,1],
     	                    [1,1,1],
@@ -1847,9 +1867,14 @@ $(function() {
 	    loadedCount:0,
 	    draw:function(){
 	        
-	        // First draw the bottom grass
-            //console.log(this.y)
+            var teamYOffset = 0;  
+            if (this.team != game.currentLevel.team){
+               teamYOffset = this.pixelHeight;
+            }
+            
+            //First draw the bottom grass
 	        context.drawImage(this.bibImage,this.x*game.gridSize +game.viewportAdjustX,(this.y+this.gridHeight-1)*game.gridSize+game.viewportAdjustY);
+	        
 	        
 
 	        
@@ -1863,33 +1888,33 @@ $(function() {
 	        }
             
             
+            var imageWidth = this.gridShape[0].length*game.gridSize;
+	        var imageHeight = this.spriteImage.height;
+            
 	        // Then draw the base with baseOffset
-	        var baseImage = this.imageArray[this.life+"-base"];
-	        if (baseImage && baseImage.length>0 && this.status != 'build' && this.status !='sell'){
-	            //context.drawImage(baseImage[0],game.gridSize*(this.x) +game.viewportAdjustX,(this.y)*game.gridSize+game.viewportAdjustY);
-	            drawSprite(baseImage[0],game.gridSize*(this.x) +game.viewportAdjustX,(this.y)*game.gridSize+game.viewportAdjustY,this.team,this.type);
+	        var baseImage = this.spriteArray[this.life+"-base"];
+	        if (baseImage && this.status != 'build' && this.status !='sell'){	            
+	            context.drawImage(this.spriteCanvas,baseImage.offset*imageWidth,teamYOffset,imageWidth,imageHeight,game.gridSize*(this.x) +game.viewportAdjustX,(this.y)*game.gridSize+game.viewportAdjustY,imageWidth,imageHeight);
 	        }
 	        
+	        
 	        // Finally draw the top part with appropriate animation
-	        var imageList = this.imageArray[imageCategory];
+	        
+	        var imageList = this.spriteArray[imageCategory];
 	        if(!this.animationIndex){
 	            this.animationIndex = 0;
 	        }
-	        //alert(imageList.length);
-	        if (imageList.length>Math.floor(this.animationIndex/this.animationSpeed)){
-	            var image = imageList[Math.floor(this.animationIndex/this.animationSpeed)];
+	        if (imageList.count>=Math.floor(this.animationIndex/this.animationSpeed)){
+	            var imageIndex = Math.floor(this.animationIndex/this.animationSpeed);
 	            if (this.status =='sell'){
-	                image = imageList[imageList.length-1 - Math.floor(this.animationIndex/this.animationSpeed)];
+	                imageIndex = imageList.count-1 - Math.floor(this.animationIndex/this.animationSpeed);
 	            }   
-	            this.currentImage = image;
-	            //context.drawImage(image,this.x*game.gridSize+game.viewportAdjustX,(this.y)*game.gridSize+game.viewportAdjustY);
-	            
-                drawSprite(image,this.x*game.gridSize+game.viewportAdjustX,(this.y)*game.gridSize+game.viewportAdjustY,this.team,this.type);
-                
-                
+	            context.drawImage(this.spriteCanvas,(imageList.offset+imageIndex)*imageWidth,teamYOffset,imageWidth,imageHeight,game.gridSize*(this.x) +game.viewportAdjustX,(this.y)*game.gridSize+game.viewportAdjustY,imageWidth,imageHeight);
 	        }
+	        
+	        
 	        this.animationIndex++;
-	        if (this.animationIndex/this.animationSpeed >= imageList.length){
+	        if (this.animationIndex/this.animationSpeed >= imageList.count){
 	            this.animationIndex = 0;
 	            if (this.name == 'refinery'&& (this.status == "build"||this.status == 'unload')){
 	                if (this.status== 'build'){
@@ -1897,11 +1922,10 @@ $(function() {
         	                y:this.y + 2,moveDirection:14,orders:{type:'harvest',from:this}}));
         	            this.status = ""; 
 	                } else {
-	                    //alert(this.harvester.name)
 	                    if (this.harvester.tiberium){
 	                        var subtractAmount = this.harvester.tiberium>4?5:this.harvester.tiberium;
 	                        if (this.team == game.currentLevel.team){
-	                            sidebar.cash += subtractAmount*20;
+	                            sidebar.cash += subtractAmount*50;
 	                        } else {
 	                            ai.cash += subtractAmount;
 	                        }
@@ -1913,9 +1937,7 @@ $(function() {
             	                y:this.y + 2,health:this.harvester.health,moveDirection:14,orders:{type:'harvest',from:this,to:this.harvester.orders.from}}));
             	                this.harvester = null;  
 	                        this.status = ""; 
-	                    }
-	                    
-        	            //alert(this.harvester.from)
+	                    }	                    
 	                }
 	                
     	               
@@ -1949,6 +1971,9 @@ $(function() {
 	        }
 	            
 	    },
+	    
+	    
+	    
 	    load:function(name){
 	        var details = this.buildingDetails[name];
 	        var buildingType = {};
@@ -1973,21 +1998,12 @@ $(function() {
 	             
 	        }
 	        
-	        buildingType.imageArray = [];
-	        for (var i = details.imagesToLoad.length - 1; i >= 0; i--){
-	            var constructImageCount = details.imagesToLoad[i].count; 
-	            var constructImageName = details.imagesToLoad[i].name;
-	            buildingType.imageArray[constructImageName] = this.loadImageArray('buildings/'+name+'/'+name+'-'+constructImageName,constructImageCount,'.gif');
-	        
-	        }
-	        
-	        //if(details.baseImageUrl){
-	        //   buildingType.baseImage = this.preloadImage(details.baseImageUrl);
-            //}
-	        
+	        this.loadSpriteSheet(buildingType,details,'buildings');
+
 	        $.extend(buildingType,details);
 	        this.types[name]=buildingType;
 	    },
+	    loadSpriteSheet:loadSpriteSheet,
 	    add:function(details){
 	        var newBuilding = {};
             newBuilding.team = game.currentLevel.team;
@@ -2003,8 +2019,107 @@ $(function() {
 	    
 	};
 	
+	function loadSpriteSheet(forObject,details,from){ 
+	    forObject.spriteCanvas = document.createElement('canvas');
+	    forObject.spriteImage = this.preloadImage
+	        (from+'/'+details.name+'-sprite-sheet.png',
+	        function() {
+	            transformSpriteSheet(forObject,details);
+	        });
+	    forObject.spriteArray = [];
+        forObject.spriteCount = 0;
+        for (var i=0; i < details.imagesToLoad.length; i++){
+            var constructImageCount = details.imagesToLoad[i].count; 
+            var constructImageName = details.imagesToLoad[i].name;
+            forObject.spriteArray[constructImageName] = 
+            {name:constructImageName,count:constructImageCount,offset:forObject.spriteCount};
+	        forObject.spriteCount += constructImageCount;        
+        }     
+	}
+	
+	function transformSpriteSheet(forObject,details){
+	    forObject.spriteCanvas.width = forObject.spriteImage.width;
+	    forObject.spriteCanvas.height = forObject.spriteImage.height*2;
+	    //document.body.appendChild(forObject.spriteCanvas);
+	    var spriteContext = forObject.spriteCanvas.getContext('2d');
+	    spriteContext.drawImage(forObject.spriteImage,0,0);
+	    spriteContext.drawImage(forObject.spriteImage,0,forObject.spriteImage.height);
+	    
+	    var colorMap = [
+                 // gun turret
+
+                 {gdi:[198,170,93],nod :[218,0,0]},
+                 {gdi:[178,149,80],nod :[191,26,7]},
+                 {gdi:[97,76,36],nod :[108,0,0]},
+
+                 //power plant
+                 {gdi:[145,137,76],nod :[169,27,26]},
+                 {gdi:[125,117,64],nod :[133,39,30]},
+                 {gdi:[109,101,56],nod :[125,1,0]},
+                 {gdi:[89,85,44],nod :[96,41,24]},
+                 {gdi:[170,153,85],nod :[190,26,7]},
+                 {gdi:[194,174,97],nod :[220,0,0]},
+                 {gdi:[246,214,121],nod :[255,0,1]},
+                 {gdi:[222,190,105],nod :[246,1,0]},
+                 
+
+            ];
+	    
+	    var imgData = spriteContext.getImageData(0,0,forObject.spriteCanvas.width,forObject.spriteCanvas.height);
+    	var imgDataArray = imgData.data;
+    	var size = imgDataArray.length/4;
+        console.log(size+" "+details.type+' '+details.name);
+    	   for (var p=size/2; p < size; p++) {
+    	     
+    	      //console.log(p)
+    	       var r = imgDataArray[p*4];
+    	       var g = imgDataArray[p*4+1];
+    	       var b = imgDataArray[p*4+2];
+    	       var a = imgDataArray[p*4+2];
+               
+                   if(details.type =='turret'||details.type=='building'||details.name=='mcv'||details.name=='harvester'){
+                       // long color map convert each yellow to re
+                       for (var i = colorMap.length - 1; i >= 0; i--){
+                           //alert(1)
+                              if(r==colorMap[i].gdi[0] && g==colorMap[i].gdi[1]  && b == colorMap[i].gdi[2]){
+                                  imgDataArray[p*4+0] = colorMap[i].nod[0];
+                                  imgDataArray[p*4+1] = colorMap[i].nod[1];
+                                  imgDataArray[p*4+2] = colorMap[i].nod[2];
+                                  break;
+                              }
+                          };
+                   } else if (details.type =='vehicle'||details.type=='infantry'){
+                       // quick hack. Just make it grayscale
+                        imgDataArray[p*4+0] = (r+g+b)/3;
+                        imgDataArray[p*4+1] = (r+g+b)/3;
+                        imgDataArray[p*4+2] = (r+g+b)/3;
+                   }
+
+    	   };
+
+           for (var p=0; p < size; p++) {
+       	       var r = imgDataArray[p*4];
+       	       var g = imgDataArray[p*4+1];
+       	       var b = imgDataArray[p*4+2];
+       	       var a = imgDataArray[p*4+2];
+
+                  // convert to transparent shadow
+                     if (g == 255 && (b==96||b==89||b==85) &&(r==0||r==85)) {
+                        imgDataArray[p*4] = 0;
+                        imgDataArray[p*4+1] = 0;
+                        imgDataArray[p*4+2] = 0;
+                        imgData.data[p*4+3] = 0.8;
+                     }
+            };
+
+ 	    spriteContext.putImageData(imgData,0,0);
+	    
+	}
+	
+	
 	var infantry = {
 	    types:[],
+	    loaded:true,
 	    infantryDetails: {
 	        'minigunner':{
 	            name:'minigunner',
@@ -2146,6 +2261,7 @@ $(function() {
 	        'mcv':{
 	            name:'mcv',
 	            label:'Mobile Construction Vehicle',
+	            type:'vehicle',
     	        turnSpeed:5,
     	        speed:12,
     	        cost:5000,
@@ -2157,11 +2273,16 @@ $(function() {
     	        pixelOffsetX:-24,
         	    pixelOffsetY:-24,
         	    collisionRadius:12, //20
-        	    softCollisionRadius:16
+        	    softCollisionRadius:16,
+        	    imagesToLoad:[
+    	            {name:'move',count:32}
+        	    ],
+
 	        },
 	        'harvester':{
 	            name:'harvester',
 	            label:'Harvester',
+	            type:'vehicle',
     	        turnSpeed:5,
     	        speed:12,
     	        cost:1400,
@@ -2170,15 +2291,16 @@ $(function() {
     	        tiberium:0,
     	        moveImageCount:32,
     	        imagesToLoad:[
-        	        {name:'harvest-0',count:4},
-        	        {name:'harvest-4',count:4},
-        	        {name:'harvest-8',count:4},
+    	            {name:'move',count:32},
+        	        {name:'harvest-00',count:4},
+        	        {name:'harvest-04',count:4},
+        	        {name:'harvest-08',count:4},
         	        {name:'harvest-12',count:4},
         	        {name:'harvest-16',count:4},
         	        {name:'harvest-20',count:4},
         	        {name:'harvest-24',count:4},
         	        {name:'harvest-28',count:4},
-        	        ],
+        	    ],
     	        pixelWidth:48,
     	        pixelHeight:48, 
     	        pixelOffsetX:-24,
@@ -2189,6 +2311,7 @@ $(function() {
 	        'light-tank':{
 	            name:'light-tank',
 	            label:'Light Tank',
+	            type:'vehicle',
     	        turnSpeed:5,
     	        speed:18,
     	        cost:600,
@@ -2198,29 +2321,17 @@ $(function() {
     	        reloadTime:2000,
     	        moveImageCount:32,
     	        turretImageCount:32,
+    	        imagesToLoad:[
+    	            {name:'move',count:32},
+    	            {name:'turret',count:32}
+        	    ],
+                
     	        pixelWidth:24,
     	        pixelHeight:24,
     	        pixelOffsetX:-12,
         	    pixelOffsetY:-12,
         	    collisionRadius:5,
         	    softCollisionRadius:9 //10
-	        },
-	        'jeep':{
-	            name:'jeep',
-	            label:'Hum-Vee',
-    	        turnSpeed:10,
-    	        speed:30,
-    	        cost:400,
-    	        sight:2,
-    	        hitPoints:150,
-    	        primaryWeapon:16,
-    	        moveImageCount:32,
-    	        turretImageCount:32,
-    	        pixelWidth:24,
-    	        pixelHeight:24,
-    	        pixelOffsetX:-12,
-        	    pixelOffsetY:-12,
-        	    collisionRadius:6
 	        }	        
 	    },
 	    preloadImage:preloadImage,
@@ -2273,44 +2384,41 @@ $(function() {
     	        status:''   
     	    };
     	    
-    	    
-	        if (!details.moveImages && details.moveImageCount){
-	            vehicleType.moveImages = this.loadImageArray('units/vehicles/'+details.name+'/'+details.name,details.moveImageCount,'.gif');
-	        }
-	        if (!details.turretImages && details.turretImageCount){
-	            vehicleType.turretImages = this.loadImageArray('units/vehicles/'+details.name+'/'+details.name+'-turret',details.turretImageCount,'.gif');
-	        }
-	        
-	        if (details.imagesToLoad){
-	            vehicleType.imageArray = [];
-	            for (var i = details.imagesToLoad.length - 1; i >= 0; i--){
-    	            var constructImageCount = details.imagesToLoad[i].count; 
-    	            var constructImageName = details.imagesToLoad[i].name;
-    	            vehicleType.imageArray[constructImageName] = this.loadImageArray('units/vehicles/'+name+'/'+name+'-'+constructImageName,constructImageCount,'.gif');
-    	            
-    	        }
-    	        
-	        }
-	        
+    	    this.loadSpriteSheet(vehicleType,details,'units/vehicles');
 	        
 	        $.extend(vehicleType,details);
-	       
 	        this.types[name]=(vehicleType);
 	    },
+	    loadSpriteSheet:loadSpriteSheet,
 	    draw:function(){
-	        if(!this.animationIndex){
-	            this.animationIndex=0;
-	        }
 	        
-	        if (this.status == ""){
-	            var moveImage = this.moveImages[Math.floor(this.moveDirection)];    
+	        // Finally draw the top part with appropriate animation
+	        var imageWidth = this.pixelWidth;
+	        var imageHeight = this.pixelHeight;
+	        var x = Math.round(this.x*game.gridSize+this.pixelOffsetX+game.viewportAdjustX);
+        	var y = Math.round(this.y*game.gridSize+this.pixelOffsetY+game.viewportAdjustY); 
+        	var teamYOffset = 0;  
+            if (this.team != game.currentLevel.team){
+               teamYOffset = this.pixelHeight;
+            }
+
+            
+
+	        if (this.status == "") {
+	            var imageList = this.spriteArray["move"];	            
+	            var imageIndex = Math.floor(this.moveDirection);
+	            context.drawImage(this.spriteCanvas,(imageList.offset+imageIndex)*imageWidth,teamYOffset,imageWidth,imageHeight,x,y,imageWidth,imageHeight);
 	        } else {
-	            //alert(this.status);
-	            //alert(this.imageArray['harvest-0']);
-	            var imageList = this.imageArray[this.status];
-	            this.animationIndex ++;
-                
-    	        if (this.animationIndex/this.animationSpeed >= imageList.length){
+	            if(!this.animationIndex){
+    	            this.animationIndex = 0;
+    	        }
+    	        var imageList = this.spriteArray[this.status];
+	            if (imageList.count>=Math.floor(this.animationIndex/this.animationSpeed)){	                
+    	            var imageIndex = Math.floor(this.animationIndex/this.animationSpeed);
+    	            context.drawImage(this.spriteCanvas,(imageList.offset+imageIndex)*imageWidth,teamYOffset,imageWidth,imageHeight,x,y,imageWidth,imageHeight); 
+	            }
+	            this.animationIndex++;
+	            if (this.animationIndex/this.animationSpeed >= imageList.count){
     	            //alert(this.animationIndex + ' / '+ this.animationSpeed)
     	            this.animationIndex = 0;
     	            if(this.status.indexOf('harvest')>-1){
@@ -2326,27 +2434,22 @@ $(function() {
     	            this.status = "";
     	            
     	        }
-    	        
-    	        var moveImage = imageList[Math.floor(this.animationIndex/this.animationSpeed)];
 	        }
 	        
-	        var x = this.x*game.gridSize+this.pixelOffsetX+game.viewportAdjustX;
-	        var y = this.y*game.gridSize+this.pixelOffsetY+game.viewportAdjustY;
-	        //alert(this.moveOffsetX)
-            //context.drawImage
-            
-            drawSprite(moveImage,x,y ,this.team,this.name=='mcv'||this.name=='harvester'?this.name:this.type); //mcv treated differently
-            
-            if (this.turretImageCount){
-                var turretImage = this.turretImages[Math.floor(this.turretDirection)];
-                context.drawImage
-                drawSprite(turretImage,x,y,this.team,this.type);
+	        if (this.turretDirection >=0 ){
+                var turretList = this.spriteArray['turret'];
+                if (turretList) {
+                     var imageIndex = Math.floor(this.turretDirection);
+                     context.drawImage(this.spriteCanvas,(turretList.offset+imageIndex)*imageWidth,teamYOffset,imageWidth,imageHeight,x,y,imageWidth,imageHeight);
+                }
             }
+	        
+	        
+	        
+	       
             this.drawSelection();
             if (game.debugMode) {
-                //context.beginPath();
-                //context.arc(this.x*game.gridSize+game.viewportAdjustX,this.y*game.gridSize+game.viewportAdjustY,this.collisionRadius,0,Math.PI*2);
-                //context.stroke();
+
                 context.fillStyle = 'white';
                 context.fillText(this.orders.type,x,y);
                 context.fillText(Math.floor(this.x) +','+Math.floor(this.y),x,y+10);
@@ -2675,11 +2778,7 @@ $(function() {
                 if (distance >1.5*this.softCollisionRadius/game.gridSize){              
                     this.moveTo(this.orders.to);
                 } else {
-                    if (this.tiberium && this.tiberium >= 10) {
-    	                //alert('returning');
-    	                //alert(this.orders.to)
-    	                //alert (this.orders.to.x)
-    	                //alert (this.orders.from.name)
+                    if (this.tiberium && this.tiberium >= 14) {
                         this.orders = {type:'harvest-return',to:this.orders.from,from:this.orders.to};
                         return;      
                     }
@@ -2687,14 +2786,10 @@ $(function() {
                     if (this.orders.to.stage< 1){
                         this.orders.to = findTiberiumInRange(this);
                     } else {
-                        if (!this.tiberium|| this.tiberium<10){
+                        if (!this.tiberium|| this.tiberium<14){
                             if (this.status==""){
-                                this.status = "harvest-"+(Math.floor(this.moveDirection/4)*4);
-
-                                //alert(this.tiberium)
+                                this.status = "harvest-"+((Math.floor(this.moveDirection/4)*4)<10?'0':'')+(Math.floor(this.moveDirection/4)*4);
                             }
-                            
-                           // alert(1)
                         } 
                         
                     }              
@@ -2968,33 +3063,7 @@ $(function() {
     	                } else {
     	                    this.turretDirection = addAngle(this.turretDirection,delta/Math.abs(delta),32)
     	                }
-        	            
-        	            //alert(this.turretDirection)
-    	                
-    	                
-    	                
     	            }
-    	            
-    	            /*
-    	            if ((instr.toDirection > this.turretDirection && (instr.toDirection - this.turretDirection) < 16)
-    	                || (instr.toDirection < this.turretDirection && (this.turretDirection- instr.toDirection ) > 16)){
-                        //alert(this.turnSpeed*0.05)
-    	                this.turretDirection = this.turretDirection + this.turnSpeed*0.1;
-    	                if((this.turretDirection-instr.toDirection)*(this.turretDirection + this.turnSpeed*0.1-instr.toDirection) <=0){
-    	                    this.turretDirection = instr.toDirection;
-    	                }
-    	            } else {
-    	                this.turretDirection = this.turretDirection - this.turnSpeed*0.1;
-    	                if((this.turretDirection-instr.toDirection)*(this.turretDirection - this.turnSpeed*0.1-instr.toDirection) <=0){
-    	                    this.turretDirection = instr.toDirection;
-    	                }
-    	            }
-    	            if (this.turretDirection>31){
-    	                this.turretDirection = 0;
-    	            } else if(this.turretDirection<0){
-    	                this.turretDirection = 31;
-    	            }      
-    	            */  
     	        }
     	        
                 if (instr.type == 'fire'){
@@ -3029,6 +3098,7 @@ $(function() {
  	        'gun-turret':{
  	            name:'gun-turret',
  	            label:'Gun Turret',
+ 	            type:'turret',
  	            powerIn:20,
      	        primaryWeapon:12,
      	        cost:600,
@@ -3038,16 +3108,21 @@ $(function() {
      	        reloadTime:1500,
      	        pixelWidth:24,
      	        pixelHeight:24,
-     	        buildImageCount:20,
-     	        turretImageCount:32, 
+     	        imagesToLoad:[
+        	        {name:'build',count:20},
+        	        {name:'damaged',count:32},
+        	        {name:"healthy",count:32}                  
+        	    ], 
      	        pixelOffsetX:-12,
          	    pixelOffsetY:-12,
 	            pixelTop:12,
-	            pixelLeft:12
+	            pixelLeft:12,
+	            gridShape:[[1]]
  	        },
  	        'guard-tower':{
  	            name:'guard-tower',
  	            label:'Guard Tower',
+ 	            type:'turret',
  	            powerIn:10,
      	        primaryWeapon:1,
      	        cost:500,
@@ -3055,13 +3130,16 @@ $(function() {
      	        sight:5,
      	        reloadTime:1000,
      	        pixelWidth:24,
-     	        pixelHeight:24,
-     	        buildImageCount:20,
-     	        turretImageCount:1, 
+     	        pixelHeight:24, 
      	        pixelOffsetX:-12,
          	    pixelOffsetY:-12,
 	            pixelTop:12,
 	            pixelLeft:12,
+	            imagesToLoad:[
+        	        {name:'build',count:20},
+        	        {name:'damaged',count:1},
+        	        {name:"healthy",count:1}                  
+        	    ],
 	            gridShape:[[1,1]]
  	        },
  	        
@@ -3092,17 +3170,21 @@ $(function() {
      	        turretDirection:0    
      	    };
 
-            turretType.imageArray = [];
-            turretType.imageArray['build'] = this.loadImageArray('turrets/'+details.name+'/'+details.name+'-build',details.buildImageCount,'.gif');
-            turretType.imageArray['healthy'] = this.loadImageArray('turrets/'+details.name+'/'+details.name+'-healthy',details.turretImageCount,'.gif');
-            turretType.imageArray['damaged'] = this.loadImageArray('turrets/'+details.name+'/'+details.name+'-damaged',details.turretImageCount,'.gif');
+
+            this.loadSpriteSheet(turretType,details,'turrets')
 
  	        $.extend(turretType,details);
  	        this.types[name]=(turretType);
  	    },
+ 	    loadSpriteSheet:loadSpriteSheet,
  	    draw:function(){
 	        var life = this.getLife();
-
+            var teamYOffset = 0;  
+            if (this.team != game.currentLevel.team){
+               teamYOffset = this.pixelHeight;
+               //alert(teamYOffset)
+            }
+            
 	        if (this.status=="build" || this.status=="sell"){
 	            imageCategory = 'build';
 	        } else if (this.status ==""){
@@ -3111,37 +3193,49 @@ $(function() {
     	            imageCategory ='damaged';
     	        }
 	        }
+
+	        
+	        var imageList = this.spriteArray[imageCategory];
+	        var imageWidth = this.gridShape[0].length*game.gridSize;
+	        var imageHeight = this.spriteImage.height;
 	        
 	        
-	        var imageList = this.imageArray[imageCategory];
-	        if(!this.animationIndex){
-	            this.animationIndex = 0;
-	        }
-	        //alert(imageList.length);
-	        if (this.status == ""){
-	            var image = imageList[Math.floor(this.turretDirection)];
-	            drawSprite(image,this.x*game.gridSize+game.viewportAdjustX,(this.y)*game.gridSize+game.viewportAdjustY,this.team,this.type);
-	        } else {         
-    	        if (imageList.length>Math.floor(this.animationIndex/this.animationSpeed)){
-    	            var image = imageList[Math.floor(this.animationIndex/this.animationSpeed)];
-    	            if (this.status =='sell'){
-    	                image = imageList[imageList.length-1 - Math.floor(this.animationIndex/this.animationSpeed)];
-    	            }   
-    	            this.currentImage = image;
-    	            //context.drawImage(image,this.x*game.gridSize+game.viewportAdjustX,(this.y)*game.gridSize+game.viewportAdjustY);
+
+	        var x = this.x*game.gridSize+game.viewportAdjustX;
+	        var y = this.y*game.gridSize+game.viewportAdjustY;
+	        if (this.status == "") {   
+	            var imageIndex = Math.floor(this.turretDirection);
 	            
-                    drawSprite(image,this.x*game.gridSize+game.viewportAdjustX,(this.y)*game.gridSize+game.viewportAdjustY,this.team,this.type);
-    	        }
-    	        this.animationIndex++;
-    	        if (this.animationIndex/this.animationSpeed >= imageList.length){
+	            context.drawImage(this.spriteCanvas,(imageList.offset+imageIndex)*imageWidth,teamYOffset,imageWidth,imageHeight,x,y,imageWidth,imageHeight);
+	        } else {
+	            if(!this.animationIndex){
     	            this.animationIndex = 0;
-    	            if (this.status == "build" || this.status == "construct"){
-    	                this.status = "";
-    	            } else if (this.status == 'sell'){
-    	                this.status == 'destroy';
+    	        }
+	            if (imageList.count>=Math.floor(this.animationIndex/this.animationSpeed)){	                
+    	            var imageIndex = Math.floor(this.animationIndex/this.animationSpeed);
+    	            if (this.status =='sell'){
+    	                imageIndex = imageList.count-1 - Math.floor(this.animationIndex/this.animationSpeed);
+    	            }
+    	            context.drawImage(this.spriteCanvas,(imageList.offset+imageIndex)*imageWidth,teamYOffset,imageWidth,imageHeight,x,y,imageWidth,imageHeight);
+	            }
+	            this.animationIndex++;
+	            if (this.animationIndex/this.animationSpeed >= imageList.count){
+    	            //alert(this.animationIndex + ' / '+ this.animationSpeed)
+    	            this.animationIndex = 0;
+    	            this.status = "";  
+	                if (this.status == 'sell'){
+    	                this.status = 'destroy';    
     	            }
     	        }
 	        }
+	        
+	        if (this.turretDirection >=0 ){
+                var turretList = this.spriteArray['turret'];
+                if (turretList) {
+                     var imageIndex = Math.floor(this.turretDirection);
+                     context.drawImage(this.spriteImage,(turretList.offset+imageIndex)*imageWidth,teamYOffset,imageWidth,imageHeight,x,y,imageWidth,imageHeight);
+                }
+            }
 	        this.drawSelection();
 
  	    },
@@ -3294,50 +3388,76 @@ $(function() {
 	        'tiberium':{
 	            name:'tiberium',
 	            count:2,
+	            pixelWidth:24,
+	            pixelHeight:24,
 	            stageCount:12, 
 	            gridOffsetX:0,
-	            gridOffsetY:0      
+	            gridOffsetY:0,
+	            imagesToLoad:[
+        	        {name:'0',count:12},
+        	        {name:'1',count:12}                 
+        	    ]     
 	        },
 	        'tree':{
 	            name:'tree',
 	            count:1,
 	            stageCount:10,
+	            pixelWidth:48,
+	            pixelHeight:48,
 	            gridOffsetX:0,
-	            gridOffsetY:-1
+	            gridOffsetY:-1,
+	            imagesToLoad:[
+	                {name:'0',count:10},
+        	        {name:'1',count:10},
+        	        {name:'2',count:10}                 
+        	    ]
 	        },
 	        'trees':{
 	            name:'trees',
 	            count:1,
 	            stageCount:10,
 	            gridOffsetX:0,
-	            gridOffsetY:-1
+	            gridOffsetY:-1,
+	            pixelWidth:72,
+	            pixelHeight:48,
+	            imagesToLoad:[
+	                {name:'0',count:10}                 
+        	    ]
 	        }       
 	    },
+	    loadSpriteSheet:loadSpriteSheet,
 	    load:function(name){
 	        var overlayType={
 	            name:name,
 	            draw:this.draw
 	        }
 	        var details = this.overlayDetails[name];
+	        
+	        this.loadSpriteSheet(overlayType,details,'tiles/temperate')
+	        /*
 	        var imageArray = [];
 	        for(i=0;i<details.count;i++){
 	            imageArray[i] = this.loadImageArray('tiles/temperate/'+name+'/'+name+'-'+i,details.stageCount,'.gif');
 	        }
 	        overlayType.imageArray = imageArray;
+	        */
 	        $.extend(overlayType,details)
 	        this.types[name] = overlayType;
 	    },
 	    draw:function(){
-	        var image = this.imageArray[this.type][this.stage];
-	        var x = (this.x+this.gridOffsetX)*game.gridSize+game.viewportAdjustX;
-	        var y = (this.y+this.gridOffsetY)*game.gridSize+game.viewportAdjustY;
-	        if(!image){
-	            console.log("error: "+this.type + ' '+ this.stage);
-	        }else {
-	            drawSprite(image,x,y);
-	        }
 	        
-	        //alert(x +' '+y)
+	        // Finally draw the top part with appropriate animation
+	        var imageWidth = this.pixelWidth;
+	        var imageHeight = this.pixelHeight;
+	        
+            var x =Math.round((this.x+this.gridOffsetX)*game.gridSize+game.viewportAdjustX);
+	        var y = Math.round((this.y+this.gridOffsetY)*game.gridSize+game.viewportAdjustY);
+            
+	        var imageList = this.spriteArray[this.type];	            
+	        var imageIndex = this.stage;
+	        context.drawImage(this.spriteCanvas,(imageList.offset+imageIndex)*imageWidth,0,imageWidth,imageHeight,x,y,imageWidth,imageHeight);
+	        
+	        return;
 	    },
 	    loadAll:function(){
 	        this.load('tiberium');
@@ -3431,7 +3551,7 @@ $(function() {
 	            team:'gdi',
 	            briefing:'This is a warning \n for all of you \n Kill enemy troops and have some fun',
 	            items: {
-	                infantry: ['minigunner'],
+	                infantry: [],// ['minigunner'],
 	                buildings:['construction-yard','power-plant','refinery','weapons-factory','advanced-power-plant','tiberium-silo','hand-of-nod'],
 	                vehicles:['mcv','light-tank','harvester'],
 	                ships:['bigboat'],
@@ -3571,7 +3691,7 @@ $(function() {
             this.sound_list['new_construction_options'] = [this.load('new_construction_options','voice')];
             this.sound_list['construction_complete'] = [this.load('construction_complete','voice')];
             this.sound_list['not_ready'] = [this.load('not_ready','voice')];
-            this.sound_list['reinforcements_have_arrived'] = [this.load('reinforcements_have_arrived','voice')];
+            //this.sound_list['reinforcements_have_arrived'] = [this.load('reinforcements_have_arrived','voice')];
             this.sound_list['low_power'] = [this.load('low_power','voice')];
             this.sound_list['unit_ready'] = [this.load('unit_ready','voice')];
             
@@ -3582,7 +3702,7 @@ $(function() {
             this.sound_list['crumble'] = [this.load('crumble','sounds')];
             this.sound_list['sell'] = [this.load('sell','sounds')];
             this.sound_list['button'] = [this.load('button','sounds')];
-            this.sound_list['clock'] = [this.load('clock','sounds')];
+            //this.sound_list['clock'] = [this.load('clock','sounds')];
             
             this.sound_list['machine_gun'] = [this.load('machine_gun-0','sounds'),this.load('machine_gun-1','sounds')];
             this.sound_list['tank_fire'] = [this.load('tank-fire-0','sounds'),this.load('tank-fire-1','sounds'),this.load('tank-fire-2','sounds'),this.load('tank-fire-3','sounds')];
@@ -3597,7 +3717,7 @@ $(function() {
 	
 	// common functions used by all objects
 	
-    function preloadImage(imgUrl){
+    function preloadImage(imgUrl,callbackFunction){
 	    var loadee = this;
 	    this.loaded = false;
 	    var image = new Image();
@@ -3607,6 +3727,9 @@ $(function() {
 	        loadee.loadedCount++;
 	        if (loadee.loadedCount == loadee.preloadCount){
 	            loadee.loaded=true;
+	        }
+	        if (callbackFunction){
+	            callbackFunction();
 	        }
 	    });
 	    return image;
@@ -3618,7 +3741,7 @@ $(function() {
 	    }
 	    var imageArray = [];
 	    for (var i=0; i < count; i++) {
-	        imageArray.push(this.preloadImage(imgName+'-'+i+extn));
+	        imageArray.push(this.preloadImage(imgName+'-'+(i<10?'0':'')+i+extn));
 	    };
         return imageArray;
 	}	
@@ -3879,96 +4002,6 @@ $(function() {
         
     var spriteCanvas = document.createElement('canvas');
     var spriteContext = spriteCanvas.getContext('2d');
-    //document.body.appendChild(spriteCanvas);
-    var colorMap = [
-             // gun turret
-
-             {gdi:[198,170,93],nod :[218,0,0]},
-             {gdi:[178,149,80],nod :[191,26,7]},
-             {gdi:[97,76,36],nod :[108,0,0]},
-
-             //power plant
-             {gdi:[145,137,76],nod :[169,27,26]},
-             {gdi:[125,117,64],nod :[133,39,30]},
-             {gdi:[109,101,56],nod :[125,1,0]},
-             {gdi:[89,85,44],nod :[96,41,24]},
-             {gdi:[170,153,85],nod :[190,26,7]},
-             {gdi:[194,174,97],nod :[220,0,0]},
-             {gdi:[246,214,121],nod :[255,0,1]},
-             {gdi:[222,190,105],nod :[246,1,0]}
-        ];
-	function drawSprite(image,x,y,team,type){
-	    
-	    
-	    x= Math.floor(x);
-	    y=Math.floor(y);
-	    
-	   var width = image.width;
-	   var height = image.height;
-	   
-	   if (team=='gdi'&& type != 'building'){   
-	        context.drawImage(image,x,y);return;
-	   }
-	   //var oldImageData = context.getImageData(x,y,width,height);
-	   spriteContext.clearRect(0,0,width+1,height+1);
-	   spriteContext.drawImage(image,0,0);
-	   //alert(width)
-	   
-	   var imgData = spriteContext.getImageData(0,0,width,height);
-	   var imgDataArray = imgData.data;
-	   var size = imgDataArray.length/4;
-	   
-	   for (var p=0; p < size; p++) {
-	       var r = imgDataArray[p*4];
-	       var g = imgDataArray[p*4+1];
-	       var b = imgDataArray[p*4+2];
-	       var a = imgDataArray[p*4+2];
-           
-           // convert to transparent shadow
-              if (g == 255 && (b < 100)) {
-                 imgDataArray[p*4] = 0;
-                 imgDataArray[p*4+1] = 0;
-                 imgDataArray[p*4+2] = 0;
-                 //imgData.data[p*4+3] = 0.8;
-              }
-           if(team=='nod'){
-               if(type =='turret'||type=='building'||type=='mcv'||type=='harvester'){
-                   // long color map convert each yellow to re
-                   for (var i = colorMap.length - 1; i >= 0; i--){
-                          if(r==colorMap[i].gdi[0] && g==colorMap[i].gdi[1]  && b == colorMap[i].gdi[2]){
-                              imgDataArray[p*4+0] = colorMap[i].nod[0];
-                              imgDataArray[p*4+1] = colorMap[i].nod[1];
-                              imgDataArray[p*4+2] = colorMap[i].nod[2];
-                              break;
-                          }
-                      };
-               } else if (type =='vehicle'||type=='infantry'){
-                   // quick hack. Just make it grayscale
-                    imgDataArray[p*4+0] = (r+g+b)/3;
-                    imgDataArray[p*4+1] = (r+g+b)/3;
-                    imgDataArray[p*4+2] = (r+g+b)/3;
-               }
-               
-               
-           }
-
-           
-	       
-	       
-	   };
-	   
-	   //context.putImageData(oldImageData,x,y);
-	   //imgData = context.createImageData(imgData.width,imgData.height)
-	   //context.globalCompositeOperation = 'destination-atop'
-	   spriteContext.globalCompositeOperation = 'source-over'
-	   spriteContext.putImageData(imgData,0,0);
-	   spriteContext.globalCompositeOperation = 'destination-atop'
-	   spriteContext.drawImage(image,0,0);
-	   
-	   context.drawImage(spriteCanvas,0,0,width,height,x,y,width,height);
-	   
-	}
-	
 	
 	function angleDiff(angle1,angle2,base){
 	    angle1 = Math.floor(angle1);
