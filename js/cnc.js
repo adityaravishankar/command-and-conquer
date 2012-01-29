@@ -1315,7 +1315,7 @@ $(function() {
                     if (buttonPressed.status == '' && !rightClick){
                         //this.buildList.push ({side:'left',counter:0,name:this.leftButtons[buttonPressed].name,buttonPressed:buttonPressed});        
                         // Disable all other buttons with same dependency
-                        if(buttonPressed.cost <= sidebar.cash) {
+                       // if(buttonPressed.cost <= sidebar.cash) {
                             for (var i = buttons.length - 1; i >= 0; i--){
                                 if(buttons[i].dependency[0] == buttonPressed.dependency[0]){
                                     buttons[i].status='disabled';
@@ -1325,9 +1325,9 @@ $(function() {
                             buttonPressed.counter = 0; 
                             buttonPressed.spent = buttonPressed.cost; 
                             sounds.play('building');
-                        } else {
-                            sounds.play('insufficient_funds');
-                        }
+                        //} else {
+                        //    sounds.play('insufficient_funds');
+                        //}
                     } else if (buttonPressed.status == 'building' && !rightClick){    
                         sounds.play('not_ready');
                     }else if (buttonPressed.status == 'building' && rightClick){
@@ -1587,6 +1587,22 @@ $(function() {
 	        var xOffset = (side == 'left')?500:570;
 	        var yOffset = 165+this.top+index*this.iconHeight;
             if (button.status == 'building'){
+                if (this.cash==0){
+                    if (!this.insufficientFunds){
+                        sounds.play('insufficient_funds');
+                        this.insufficientFunds = true;
+                    }
+                    return;
+                }
+                this.insufficientFunds = false;
+                
+                if (this.cash< Math.round(button.cost * button.speed/100)){
+                    button.counter += button.speed*this.cash/Math.round(button.cost * button.speed/100);
+                    button.spent -= this.cash;
+                    this.cash = 0;
+                    return;
+                }
+                
 	            button.counter += button.speed;
 	            button.spent -= Math.round(button.cost * button.speed/100);
  	            this.cash -= Math.round(button.cost * button.speed/100);
