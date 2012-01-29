@@ -571,6 +571,7 @@ $(function() {
     	highlightGrid: function(i,j,width,height,optionalImage){
             //alert('('+i+','+j+')');
             var gridSize = game.gridSize;
+            
             if (optionalImage && $(optionalImage).is('img')){
                 context.drawImage(optionalImage,i*gridSize+game.viewportAdjustX,j*gridSize + game.viewportAdjustY,width*gridSize,height*gridSize);
             } else {
@@ -1031,6 +1032,11 @@ $(function() {
             } else if (sidebar.sellMode){
 	            if(selectedObject && selectedObject.team == game.currentLevel.team 
 	                && (selectedObject.type=='building'||selectedObject.type=='turret')){
+	                    if (selectedObject.name=='refinery' && selectedObject.status=='unload'){
+	                        game.units.push(vehicles.add({name:'harvester',team:selectedObject.team,x:selectedObject.x+0.5,
+            	                y:selectedObject.y + 2,health:selectedObject.harvester.health,moveDirection:14,orders:{type:'guard'}}));
+            	                selectedObject.harvester = null;       
+	                    }
 	                    selectedObject.status = 'sell';
 	                    sounds.play('sell');
 	                    sidebar.cash += selectedObject.cost/2;
