@@ -1,2 +1,0 @@
-1. The map is broken into grids of 24x24 pixels.
-2. Timeout is 32 ms
