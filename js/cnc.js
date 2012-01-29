@@ -149,7 +149,8 @@ $(function() {
         	    for (var y=0; y < grid.length; y++) {
         	       for (var x=0; x < grid[y].length; x++) {
         	           if(grid[y][x] == 1){
-        	               if (game.buildingObstructionGrid[mouse.gridY+y][mouse.gridX+x] == 1){
+        	               if (mouse.gridY+y<0||mouse.gridY+y>=game.buildingObstructionGrid.length||mouse.gridX+x<0||mouse.gridX+x>= game.buildingObstructionGrid[mouse.gridY+y].length|| game.buildingObstructionGrid[mouse.gridY+y][mouse.gridX+x] == 1){
+        	               //if (game.buildingObstructionGrid[mouse.gridY+y][mouse.gridX+x] == 1){
         	                   game.highlightGrid(mouse.gridX+x,mouse.gridY+y,1,1,sidebar.placementRedImage);
         	                } else {
         	                    game.highlightGrid(mouse.gridX+x,mouse.gridY+y,1,1,sidebar.placementWhiteImage);
@@ -1013,10 +1014,11 @@ $(function() {
             	    //grid.push(grid[1]);
             	    for (var y=0; y < grid.length; y++) {
             	       for (var x=0; x < grid[y].length; x++) {
+            	          
             	           if(grid[y][x] == 1){
-            	               if (game.buildingObstructionGrid[mouse.gridY+y][mouse.gridX+x] == 1){
+            	               console.log("mouse.gridX+x"+(mouse.gridX+x)+"mouse.gridY+y:"+(mouse.gridY+y))
+            	               if (mouse.gridY+y<0||mouse.gridY+y>=game.buildingObstructionGrid.length||mouse.gridX+x<0||mouse.gridX+x>= game.buildingObstructionGrid[mouse.gridY+y].length|| game.buildingObstructionGrid[mouse.gridY+y][mouse.gridX+x] == 1){
             	                   sounds.play('cannot_deploy_here');
-            	                   
             	                   return;
             	                }
                             }
@@ -3643,8 +3645,8 @@ $(function() {
 	               // {x1:8,y1:8,x2:10,y2:10,type:'tree-1'},
 	                //{x1:8,y1:8,x2:10,y2:10,type:'tiberium-1'}
 	            ], //the trees and tiberium .. can terrain and overlay be in the same?
-	            gridWidth:32,
-	            gridHeight:32,
+	            gridWidth:31,
+	            gridHeight:31,
 	            team:'gdi',
 	            briefing:'This is a warning \n for all of you \n Kill enemy troops and have some fun',
 	            items: {
