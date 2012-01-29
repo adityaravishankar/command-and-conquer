@@ -1,3 +1,4 @@
+
 $(function() {
     var canvas = $('#canvas')[0];
 	var context = canvas.getContext('2d');
@@ -137,6 +138,7 @@ $(function() {
 	    draw:function(){
 	        this.cursor = this.cursors['default'];
 	        var selectedObject = this.checkOverObject();
+	        
 	        if(this.y < game.viewportTop || this.y>game.viewportTop + game.viewportHeight){
 	            // default cursor if too much to the top
 	        } else if (sidebar.deployMode){
@@ -147,7 +149,7 @@ $(function() {
         	    for (var y=0; y < grid.length; y++) {
         	       for (var x=0; x < grid[y].length; x++) {
         	           if(grid[y][x] == 1){
-        	               if (game.obstructionGrid[mouse.gridY+y][mouse.gridX+x] == 1){
+        	               if (game.buildingObstructionGrid[mouse.gridY+y][mouse.gridX+x] == 1){
         	                   game.highlightGrid(mouse.gridX+x,mouse.gridY+y,1,1,sidebar.placementRedImage);
         	                } else {
         	                    game.highlightGrid(mouse.gridX+x,mouse.gridY+y,1,1,sidebar.placementWhiteImage);
@@ -193,12 +195,10 @@ $(function() {
             	    context.font = '12px "Command and Conquer"';
                     context.fillText(tooltipName,Math.round(this.x+4),Math.round(this.y+30));
                     context.fillText(tooltipCost,Math.round(this.x+4),Math.round(this.y+44));
-                }
-	            
-	            
+                }	            
 	        } else if(this.dragSelect){
 	            this.cursor = this.cursors['default'];
-	        } else if(selectedObject){
+	        } else if(selectedObject && !this.isOverFog){
 	            if(selectedObject.team && selectedObject.team != game.currentLevel.team  && game.selectedAttackers.length>0){
 	                this.cursor = this.cursors['attack'];
 	            } else if (game.selectedUnits.length == 1 && game.selectedUnits[0].name== 'harvester' 
@@ -229,7 +229,7 @@ $(function() {
         	    this.cursor = this.cursors[this.panDirection];
         	}
             else if(game.selectedUnits.length>0){           
-	            if(game.obstructionGrid[mouse.gridY] && game.obstructionGrid[mouse.gridY][mouse.gridX] == 1){
+	            if(game.obstructionGrid[mouse.gridY] && game.obstructionGrid[mouse.gridY][mouse.gridX] == 1 && !this.isOverFog) {
 	                this.cursor = this.cursors['no_move'];
 	            } else {
 	               this.cursor = this.cursors['move'];
@@ -280,7 +280,7 @@ $(function() {
 
     			mouse.gridX = Math.floor((mouse.gameX) / game.gridSize);
     			mouse.gridY = Math.floor((mouse.gameY) / game.gridSize);
-
+                mouse.isOverFog = fog.isOver(mouse.gameX,mouse.gameY);
     			//mouse.panDirection = mouse.handlePanning();
     			//mouse.showAppropriateCursor();
     			if (mouse.buttonPressed){
@@ -329,7 +329,7 @@ $(function() {
                             var unit = game.units[i];
                             if(!unit.selected && unit.team==game.currentLevel.team && x1<= unit.x*game.gridSize && x2 >= unit.x*game.gridSize
                                 && y1<= unit.y*game.gridSize && y2 >= unit.y*game.gridSize){
-                                    game.selectItem(unit);
+                                    game.selectItem(unit,ev.shiftKey);
                                 }
                         };
     			        //mouse.dragSelect = false;
@@ -348,6 +348,10 @@ $(function() {
 	            mouse.insideCanvas = true;
 	        });	        
 	        
+	        
+	        $(document).keypress(function(ev) {
+	            game.keyPressed(ev);
+	        });
 	        
 	    },
 	    loaded:false,
@@ -443,11 +447,18 @@ $(function() {
     	    
     	    
     	    // Create an obstruction grid from the level 
-    	    game.obstructionGrid = [];
+    	    game.obstructionGrid = []; // normal obstructions
+    	    game.heroObstructionGrid = []; // Cannot see in fog, so pretend
+    	    game.buildingObstructionGrid = [];  // Cannot build on fog; Cannot build on bib
+    	    
     	    for (var y=0; y < this.currentLevel.obstructionGrid.length; y++) {
     	        game.obstructionGrid[y] = [];
+    	        game.heroObstructionGrid[y] = [];
+    	        game.buildingObstructionGrid[y] = [];
     	       for (var x=0; x < this.currentLevel.obstructionGrid[y].length; x++) {
-    	           game.obstructionGrid[y][x] = this.currentLevel.obstructionGrid[y][x]
+    	           game.obstructionGrid[y][x] = this.currentLevel.obstructionGrid[y][x];
+    	           game.heroObstructionGrid[y][x] = this.currentLevel.obstructionGrid[y][x];
+    	           game.buildingObstructionGrid[y][x] = this.currentLevel.obstructionGrid[y][x];
 	           }
     	    }
             
@@ -457,6 +468,13 @@ $(function() {
     	            for(var x = 0;x<bldng.gridShape[y].length;x++){
     	                if(bldng.gridShape[y][x]==1){
     	                    game.obstructionGrid[y+bldng.y][x+bldng.x] = 1;
+    	                    game.heroObstructionGrid[y+bldng.y][x+bldng.x] = 1;
+    	                    game.buildingObstructionGrid[y+bldng.y][x+bldng.x] = 1;
+
+    	                    //include an extra row for bib as a no building zone
+    	                    if(y == bldng.gridShape.length-1){
+    	                        game.buildingObstructionGrid[y+1+bldng.y][x+bldng.x] = 1;
+    	                    }
     	                }
     	            }
     	        }
@@ -464,38 +482,90 @@ $(function() {
     	    };
     	    for (var i = this.turrets.length - 1; i >= 0; i--){
     	        game.obstructionGrid[this.turrets[i].y][this.turrets[i].x] = 1;
+    	        game.heroObstructionGrid[y+bldng.y][x+bldng.x] = 1;
+    	        game.buildingObstructionGrid[y+bldng.y][x+bldng.x] = 1;
     	    };
     	    
+    	    
     	    for (var i = this.units.length - 1; i >= 0; i--){
-    	        var unit = this.units[i];
-    	        if(!unit.moving){
-    	            if (unit.orders && unit.orders.type != 'guard'){
-    	                break;
-    	            }
-    	            //var x = unit.x;
-        	        //var y = unit.y;
+    	            var unit = this.units[i];
+    	        
+    	            var x = unit.x;
+        	        var y = unit.y;
         	        //var collisionRadius = unit.collisionRadius/game.gridSize;
-        	        //game.obstructionGrid[Math.floor(y)][Math.floor(x)] = 1;
+        	        game.buildingObstructionGrid[Math.floor(y)][Math.floor(x)] = 1;
     	            //game.obstructionGrid[Math.floor(y-collisionRadius)][Math.floor(x-collisionRadius)] = 1;
     	            //game.obstructionGrid[Math.floor(y-collisionRadius)][Math.floor(x+collisionRadius)] = 1;
     	            //game.obstructionGrid[Math.floor(y+collisionRadius)][Math.floor(x-collisionRadius)] = 1;
     	            //game.obstructionGrid[Math.floor(y+collisionRadius)][Math.floor(x+collisionRadius)] = 1;
-    	        }
+    	        
     	    };
     	    
     	    for (var i = this.overlay.length - 1; i >= 0; i--){
     	        var over= this.overlay[i];
                  if(over.name == 'tree'){
                     game.obstructionGrid[over.y][over.x] = 1;
+                    game.heroObstructionGrid[over.y][over.x] = 1;
+                    game.buildingObstructionGrid[over.y][over.x] = 1;
                 } else if(over.name == 'trees'){
                     game.obstructionGrid[over.y][over.x] = 1;
                     game.obstructionGrid[over.y][over.x+1] = 1;
+                    game.heroObstructionGrid[over.y][over.x] = 1;
+                    game.heroObstructionGrid[over.y][over.x+1] = 1;
+                    game.buildingObstructionGrid[over.y][over.x] = 1;
+                    game.buildingObstructionGrid[over.y][over.x+1] = 1;
+                }else if(over.name == 'tiberium'){
+                    game.buildingObstructionGrid[over.y][over.x] = 1;
                 }
-                
-                
     	    };
     	    
     	    
+    	    // If hero cannot see under fog, he assumes he can travel there... 
+    	    // when he sees the building, he goes oops!!! and then starts avoiding it....
+    	    
+    	    // Buildings can't be built on fog either
+    	    for (var y=0; y < game.heroObstructionGrid.length; y++) {
+    	       for (var x=0; x < game.heroObstructionGrid[y].length; x++) {
+    	           if(fog.isOver((x+0.5)*game.gridSize,(y+0.5)*game.gridSize)){
+    	               //game.heroObstructionGrid[y][x] = 0;
+    	               game.buildingObstructionGrid[y][x] = 1;
+    	           }
+	           }
+    	    }
+    	    
+    	},
+    	controlGroups:[],
+    	keyPressed:function(ev){
+    	    var keyCode = ev.which;
+    	    var ctrlPressed = ev.ctrlKey;
+    	    //keys from 0 to 9 pressed
+    	    if (keyCode >= 48 && keyCode <= 57) {
+    	        var keyNumber = (keyCode-48)
+    	        if (ctrlPressed){
+    	            if (game.selectedItems.length > 0){
+    	                game.controlGroups[keyNumber] = $.extend([],game.selectedItems);
+    	                //console.log(keyNumber + ' now has ' +game.controlGroups[keyNumber].length +' items');
+    	            }
+    	            //console.log ("Pressed Ctrl"+ (keyNumber-48));   
+    	        } else {
+    	            if (game.controlGroups[keyNumber]){
+    	                game.clearSelection();
+    	                //console.log ("Pressed"+ (keyNumber));
+    	                //console.log(game.controlGroups[keyNumber].length)
+    	                for (var i = game.controlGroups[keyNumber].length - 1; i >= 0; i--){
+    	                    if (game.controlGroups[keyNumber][i].status=='destroy'){
+    	                        game.controlGroups[keyNumber].splice(i,1);
+    	                    } else {
+    	                        game.selectItem(game.controlGroups[keyNumber][i]);
+    	                    }
+    	                    
+    	                    //console.log ('selecting '+game.controlGroups[keyNumber][i].name)
+    	                };
+    	            }
+    	            
+    	        }
+    	        
+    	    }
     	},
     	highlightGrid: function(i,j,width,height,optionalImage){
             //alert('('+i+','+j+')');
@@ -536,7 +606,7 @@ $(function() {
     	    
     	    for (var i = game.obstructionGrid.length - 1; i >= 0; i--){
     	       for (var j = game.obstructionGrid[i].length - 1; j >= 0; j--){
-    	           if(game.obstructionGrid[i][j] == 1){
+    	           if(game.heroObstructionGrid[i][j] == 1){
     	               game.highlightGrid(j,i,1,1,'rgba(100,0,0,0.5)');
     	           }
     	       };
@@ -891,7 +961,16 @@ $(function() {
     	    this.selectedAttackers = [];
     	    this.selectedUnits = []
     	},
-    	selectItem:function(item){
+    	selectItem:function(item,shiftPressed){
+    	    if (shiftPressed && item.selected){
+    	        // deselect item
+    	        item.selected = false;
+    	        this.selectedItems.remove(item);
+    	        this.selectedUnits.remove(item);
+    	        this.selectedAttackers.remove(item);
+    	        return;    	    
+    	    }
+    	    
     	    item.selected = true;
             this.selectedItems.push(item);
             //alert(1)
@@ -935,8 +1014,9 @@ $(function() {
             	    for (var y=0; y < grid.length; y++) {
             	       for (var x=0; x < grid[y].length; x++) {
             	           if(grid[y][x] == 1){
-            	               if (game.obstructionGrid[mouse.gridY+y][mouse.gridX+x] == 1){
+            	               if (game.buildingObstructionGrid[mouse.gridY+y][mouse.gridX+x] == 1){
             	                   sounds.play('cannot_deploy_here');
+            	                   
             	                   return;
             	                }
                             }
@@ -964,7 +1044,7 @@ $(function() {
     	                }
     	            } else if (game.selectedUnits.length == 1 && game.selectedUnits[0].name== 'harvester' 
         	                    && game.selectedUnits[0].team == game.currentLevel.team
-        	                    && (selectedObject.name == 'tiberium'||selectedObject.name=='refinery')) {
+        	                    && (selectedObject.name == 'tiberium'||selectedObject.name=='refinery') && !mouse.isOverFog) {
         	            //My team's harvester is selected alone
         	                if (selectedObject.name == 'tiberium') {
         	                    game.selectedUnits[0].orders = {type:'harvest',to:{x:selectedObject.x,y:selectedObject.y}};
@@ -978,8 +1058,8 @@ $(function() {
     	                if(!ev.shiftKey){
     	                    this.clearSelection();
     	                }
-                        this.selectItem(selectedObject);
-                    } else if(game.selectedAttackers.length>0 && selectedObject.name != 'tiberium'){
+                        this.selectItem(selectedObject,ev.shiftKey);
+                    } else if(game.selectedAttackers.length>0 && selectedObject.name != 'tiberium' && !mouse.isOverFog){
                         for (var i = game.selectedAttackers.length - 1; i >= 0; i--){
                             if (game.selectedAttackers[i].primaryWeapon){
                                 game.selectedAttackers[i].orders = {type:'attack',target:selectedObject}; 
@@ -989,8 +1069,8 @@ $(function() {
             	        };  
                     } else if (selectedObject.name == 'tiberium') {
                         if(game.selectedUnits.length>0){
-            	            if(game.obstructionGrid[mouse.gridY] && game.obstructionGrid[mouse.gridY][mouse.gridX] == 1){
-
+            	            if(game.obstructionGrid[mouse.gridY] && game.obstructionGrid[mouse.gridY][mouse.gridX] == 1 && !mouse.isOverFog){
+                                // Don't do anything
             	            } else {
             	                for (var i = game.selectedUnits.length - 1; i >= 0; i--){
                     	           game.selectedUnits[i].orders = {type:'move',to:{x:mouse.gridX,y:mouse.gridY}}; 
@@ -1002,12 +1082,12 @@ $(function() {
                         if(!ev.shiftKey){
     	                    this.clearSelection();
     	                }
-                        this.selectItem(selectedObject);   
+                        this.selectItem(selectedObject,ev.shiftKey);   
                     }
     	        } else { // no object under mouse
         	        if(game.selectedUnits.length>0){
-        	            if(game.obstructionGrid[mouse.gridY] && game.obstructionGrid[mouse.gridY][mouse.gridX] == 1){
-
+        	            if(game.obstructionGrid[mouse.gridY] && game.obstructionGrid[mouse.gridY][mouse.gridX] == 1 && !mouse.isOverFog){
+                            // Don't do anything
         	            } else {
         	                for (var i = game.selectedUnits.length - 1; i >= 0; i--){
                 	           game.selectedUnits[i].orders = {type:'move',to:{x:mouse.gridX,y:mouse.gridY}}; 
@@ -2085,7 +2165,7 @@ $(function() {
 	    var imgData = spriteContext.getImageData(0,0,forObject.spriteCanvas.width,forObject.spriteCanvas.height);
     	var imgDataArray = imgData.data;
     	var size = imgDataArray.length/4;
-        console.log(size+" "+details.type+' '+details.name);
+        
     	   for (var p=size/2; p < size; p++) {
     	     
     	      //console.log(p)
@@ -2493,7 +2573,7 @@ $(function() {
 	    moveTo:function(destination,turretAtTarget){
 	        var start = [Math.floor(this.x),Math.floor(this.y)];
             var end = [destination.x,destination.y];
-            this.path = findPath(start,end);
+            this.path = findPath(start,end,this.team == game.currentLevel.team);
             //this.path = [];
             //this.path = [{x:start[0],y:start[1]},{x:end[0],y:end[1]}];
             this.instructions = [];
@@ -3503,7 +3583,7 @@ $(function() {
 	    levelDetails : {
 	        "gdi1" :{
 	            mapUrl: 'maps/gdi/map01.jpeg', // The background map to load
-	            startingCash:5000,
+	            startingCash:3000,
 	            terrain : [
 	                {x1:0,y1:27,x2:30,y2:30,type:'water'},
 	                {x1:0,y1:26,x2:6,y2:26,type:'water'},
@@ -3704,7 +3784,7 @@ $(function() {
             this.sound_list['building'] = [this.load('building','voice')];
             this.sound_list['on_hold'] = [this.load('on_hold','voice')];
             this.sound_list['cancelled'] = [this.load('cancelled','voice')];
-            this.sound_list['cannot_deploy_here_here'] = [this.load('cannot_deploy_here','voice')];
+            this.sound_list['cannot_deploy_here'] = [this.load('cannot_deploy_here','voice')];
             this.sound_list['new_construction_options'] = [this.load('new_construction_options','voice')];
             this.sound_list['construction_complete'] = [this.load('construction_complete','voice')];
             this.sound_list['not_ready'] = [this.load('not_ready','voice')];
@@ -3881,7 +3961,7 @@ $(function() {
         var currentOverlay;
         for (var i=0; i < game.overlay.length; i++) {
             var overlay = game.overlay[i];
-            if (overlay.name == 'tiberium' & overlay.stage>0){
+            if (overlay.name == 'tiberium' & overlay.stage>0 && !fog.isOver(overlay.x*game.gridSize,overlay.y*game.gridSize)){
                 var distance = Math.pow(overlay.x-hero.x,2)+Math.pow(overlay.y-hero.y,2);
                 if (!currentDistance || (currentDistance > distance)){
                     currentOverlay = overlay;
@@ -3922,8 +4002,8 @@ $(function() {
  	    return enemies;   
     }
     
-    function findPath(start,end) {
-        var g = game.obstructionGrid;
+    function findPath(start,end,isHeroTeam) {
+        var g = isHeroTeam? game.heroObstructionGrid:game.obstructionGrid;
         // hack to find path to buildings
         try {
             g[end[1]][end[0]] = 0;
@@ -3947,15 +4027,23 @@ $(function() {
         return path;
     }
     
+
     var fog = {
         fogCanvas : document.createElement('canvas'),
-        
+        isOver:function(x,y){
+            var currentMap = game.currentLevel.mapImage;    
+            
+            var pixel = this.fogContext.getImageData(x*this.canvasWidth/currentMap.width,y*this.canvasHeight/currentMap.height,1,1).data;
+            //alert("fog "+x+","+y+" "+pixel[0]+" "+pixel[1]+" "+pixel[2]+" "+pixel[3]);
+            return (pixel[3] == 255);
+        },
         canvasWidth:128,
         canvasHeight:128,
         init: function(){
             this.fogContext = this.fogCanvas.getContext('2d'),
             this.fogContext.fillStyle = 'rgba(0,0,0,1)';
     	    this.fogContext.fillRect(0,0,this.canvasWidth,this.canvasHeight);
+    	
         },
         draw:function(){
             var fogCanvas = this.fogCanvas;
@@ -4278,7 +4366,14 @@ $(function() {
 
     }());
 	
-	
+	Array.prototype.remove = function(e) {
+        var t, _ref;
+        if ((t = this.indexOf(e)) > -1) {
+            return ([].splice.apply(this, [t, t - t + 1].concat(_ref = [])), _ref);
+        }
+    };
+    
+    
 	// begin the game
     game.start();
     $('#debugger').toggle();
