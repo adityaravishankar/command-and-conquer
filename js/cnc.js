@@ -1336,9 +1336,10 @@ $(function() {
                     } else if (buttonPressed.status == 'hold' && !rightClick){
                         buttonPressed.status = 'building';
                         sounds.play('building');
-                    } else if (buttonPressed.status == 'hold' && rightClick){
+                    } else if ((buttonPressed.status == 'hold'  ||buttonPressed.status == 'ready')&& rightClick){
                             buttonPressed.status = '';
                             sounds.play('cancelled');
+                            sidebar.cash += buttonPressed.cost-buttonPressed.spent;
                             for (var i = buttons.length - 1; i >= 0; i--){
                                 buttons[i].status='';
                             };     
@@ -3687,7 +3688,7 @@ $(function() {
             this.sound_list['building'] = [this.load('building','voice')];
             this.sound_list['on_hold'] = [this.load('on_hold','voice')];
             this.sound_list['cancelled'] = [this.load('cancelled','voice')];
-            this.sound_list['cannot_deploy_here'] = [this.load('cannot_deploy_here','voice')];
+            this.sound_list['cannot_deploy_here_here'] = [this.load('cannot_deploy_here','voice')];
             this.sound_list['new_construction_options'] = [this.load('new_construction_options','voice')];
             this.sound_list['construction_complete'] = [this.load('construction_complete','voice')];
             this.sound_list['not_ready'] = [this.load('not_ready','voice')];
