@@ -1017,7 +1017,7 @@ $(function() {
             	       for (var x=0; x < grid[y].length; x++) {
             	          
             	           if(grid[y][x] == 1){
-            	               console.log("mouse.gridX+x"+(mouse.gridX+x)+"mouse.gridY+y:"+(mouse.gridY+y))
+            	               //console.log("mouse.gridX+x"+(mouse.gridX+x)+"mouse.gridY+y:"+(mouse.gridY+y))
             	               if (mouse.gridY+y<0||mouse.gridY+y>=game.buildingObstructionGrid.length||mouse.gridX+x<0||mouse.gridX+x>= game.buildingObstructionGrid[mouse.gridY+y].length|| game.buildingObstructionGrid[mouse.gridY+y][mouse.gridX+x] == 1){
             	                   sounds.play('cannot_deploy_here');
             	                   return;
@@ -3222,6 +3222,8 @@ $(function() {
          	    pixelOffsetY:-12,
 	            pixelTop:12,
 	            pixelLeft:12,
+	            gridWidth:1,
+        	    gridHeight:1,
 	            gridShape:[[1]]
  	        },
  	        'guard-tower':{
@@ -3245,6 +3247,8 @@ $(function() {
         	        {name:'damaged',count:1},
         	        {name:"healthy",count:1}                  
         	    ],
+        	    gridWidth:1,
+        	    gridHeight:1,
 	            gridShape:[[1,1]]
  	        },
  	        
@@ -4003,8 +4007,9 @@ $(function() {
  	    };
         for (var i = game.turrets.length - 1; i >= 0; i--){
             var test = game.turrets[i];
+            
  	        if(test.team != hero.team && Math.pow(test.x+test.gridWidth/2-hero.x,2) + Math.pow(test.y+test.gridHeight/2-hero.y,2) <= Math.pow(hero.sight+increment,2)){
-                enemies.push(test);      
+                enemies.push(test);    
  	        }
  	    };	 
  	    return enemies;   
