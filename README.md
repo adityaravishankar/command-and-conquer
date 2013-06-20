@@ -23,6 +23,10 @@ A more recent version of the project is available here. http://www.adityaravisha
 
 This version is a complete rewrite of the earlier demo shared on github.
 
-The new version has more levels from the original game, more units, explosions, effects and background music. Multiplayer support is also being tested using Node.js & nowjs. Demo Video
+The new version has more levels from the original game, more units, explosions, effects and background music. Multiplayer support is also being tested using Node.js & nowjs. 
 
-This new version is NOT open source. It is still free to play. News, updates, screenshots, videos and invites to beta releases are available on the C&C HTML5 Facebook page
+[Demo Video](http://www.youtube.com/watch?v=HTZCMxNtloQ)
+
+This new version is NOT open source. It is still free to play. 
+
+News, updates, screenshots, videos and invites to beta releases are available on the [C&C HTML5 Facebook page](http://www.facebook.com/CommandConquerHtml5)
